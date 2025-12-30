@@ -57,10 +57,12 @@ Blockly.Msg.CONTROL_CLEARCOUNTER = 'clear counter';
 Blockly.Msg.CONTROL_ALLATONCE = 'all at once';
 
 // Data blocks
-Blockly.Msg.DATA_SETVARIABLETO = 'set %1 to %2';
+// Blockly.Msg.DATA_SETVARIABLETO = 'set %1 to %2';
+Blockly.Msg.DATA_SETVARIABLETO = 'set %1 type %2 to %3';
 Blockly.Msg.DATA_CHANGEVARIABLEBY = 'change %1 by %2';
 Blockly.Msg.DATA_SHOWVARIABLE = 'show variable %1';
 Blockly.Msg.DATA_HIDEVARIABLE = 'hide variable %1';
+Blockly.Msg.DATA_INITLIST = 'initialize list %1 length %2 type %3';
 Blockly.Msg.DATA_ADDTOLIST = 'add %1 to %2';
 Blockly.Msg.DATA_DELETEOFLIST = 'delete %1 of %2';
 Blockly.Msg.DATA_DELETEALLOFLIST = 'delete all of %1';
@@ -329,10 +331,10 @@ Blockly.Msg.DELETE_VARIABLE = 'Delete the "%1" variable';
 
 // Custom Procedures
 // @todo Remove these once fully managed by Scratch VM / Scratch GUI
-Blockly.Msg.NEW_PROCEDURE = 'Make a Block';
+Blockly.Msg.NEW_PROCEDURE = 'Make a Function';
 Blockly.Msg.PROCEDURE_ALREADY_EXISTS = 'A procedure named "%1" already exists.';
-Blockly.Msg.PROCEDURE_DEFAULT_NAME = 'block name';
-Blockly.Msg.PROCEDURE_USED = 'To delete a block definition, first remove all uses of the block';
+Blockly.Msg.PROCEDURE_DEFAULT_NAME = 'function name';
+Blockly.Msg.PROCEDURE_USED = 'To delete a function definition, first remove all uses of the function';
 
 // Lists
 // @todo Remove these once fully managed by Scratch VM / Scratch GUI
