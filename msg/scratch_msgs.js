@@ -5431,7 +5431,7 @@ Blockly.ScratchMsgs.locales["en"] =
     "CATEGORY_SENSING": "Sensing",
     "CATEGORY_OPERATORS": "Operators",
     "CATEGORY_VARIABLES": "Variables",
-    "CATEGORY_MYBLOCKS": "My Blocks",
+    "CATEGORY_MYBLOCKS": "Function",
     "DUPLICATE": "Duplicate",
     "DELETE": "Delete",
     "ADD_COMMENT": "Add Comment",
