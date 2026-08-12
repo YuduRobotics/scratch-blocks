@@ -637,6 +637,27 @@ Blockly.Connection.prototype.targetBlock = function() {
  * @protected
  */
 Blockly.Connection.prototype.checkType_ = function(otherConnection) {
+  if (this.sourceBlock_ && otherConnection.sourceBlock_) {
+    var isOledBlock = false;
+    var isBoolean = false;
+    // Check if `this` is the OLED block input
+    if (this.sourceBlock_.type && this.sourceBlock_.type.indexOf('output_oled') !== -1) {
+      isOledBlock = true;
+      if (otherConnection.check_ && otherConnection.check_.indexOf('Boolean') !== -1) {
+        isBoolean = true;
+      }
+    } 
+    // Check if `otherConnection` is the OLED block input
+    else if (otherConnection.sourceBlock_.type && otherConnection.sourceBlock_.type.indexOf('output_oled') !== -1) {
+      isOledBlock = true;
+      if (this.check_ && this.check_.indexOf('Boolean') !== -1) {
+        isBoolean = true;
+      }
+    }
+    if (isOledBlock && isBoolean) {
+      return false; // Reject Boolean connections for OLED display blocks
+    }
+  }
   if (!this.check_ || !otherConnection.check_) {
     // One or both sides are promiscuous enough that anything will fit.
     return true;
