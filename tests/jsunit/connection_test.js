@@ -402,3 +402,60 @@ function test_canConnectWithReason_Procedures_NextConnection() {
   assertEquals(Blockly.Connection.CAN_CONNECT,
       one.canConnectWithReason_(two));
 }
+
+function test_canConnectWithReason_OledRejectsBoolean() {
+  var sharedWorkspace = {};
+  var oledInput = helper_createConnection(0, 0, Blockly.INPUT_VALUE);
+  oledInput.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  oledInput.sourceBlock_.type = 'onePointZero_output_oled_line';
+
+  var booleanOutput = helper_createConnection(0, 0, Blockly.OUTPUT_VALUE);
+  booleanOutput.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  booleanOutput.setCheck('Boolean');
+
+  assertEquals(Blockly.Connection.REASON_CHECKS_FAILED,
+      oledInput.canConnectWithReason_(booleanOutput));
+}
+
+function test_canConnectWithReason_OperatorRejectsBoolean() {
+  var sharedWorkspace = {};
+  var operatorInput = helper_createConnection(0, 0, Blockly.INPUT_VALUE);
+  operatorInput.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  operatorInput.sourceBlock_.type = 'operator_add';
+
+  var booleanOutput = helper_createConnection(0, 0, Blockly.OUTPUT_VALUE);
+  booleanOutput.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  booleanOutput.setCheck('Boolean');
+
+  assertEquals(Blockly.Connection.REASON_CHECKS_FAILED,
+      operatorInput.canConnectWithReason_(booleanOutput));
+}
+
+function test_canConnectWithReason_OperatorAndAllowsBoolean() {
+  var sharedWorkspace = {};
+  var andInput = helper_createConnection(0, 0, Blockly.INPUT_VALUE);
+  andInput.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  andInput.sourceBlock_.type = 'operator_and';
+  andInput.setCheck('Boolean');
+
+  var booleanOutput = helper_createConnection(0, 0, Blockly.OUTPUT_VALUE);
+  booleanOutput.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  booleanOutput.setCheck('Boolean');
+
+  assertEquals(Blockly.Connection.CAN_CONNECT,
+      andInput.canConnectWithReason_(booleanOutput));
+}
+
+function test_canConnectWithReason_OledAllowsNumber() {
+  var sharedWorkspace = {};
+  var oledInput = helper_createConnection(0, 0, Blockly.INPUT_VALUE);
+  oledInput.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  oledInput.sourceBlock_.type = 'onePointZero_output_oled_line';
+
+  var numberOutput = helper_createConnection(0, 0, Blockly.OUTPUT_VALUE);
+  numberOutput.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  numberOutput.setCheck('Number');
+
+  assertEquals(Blockly.Connection.CAN_CONNECT,
+      oledInput.canConnectWithReason_(numberOutput));
+}
