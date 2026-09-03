@@ -89,6 +89,13 @@ Blockly.DropDownDiv.ARROW_HORIZONTAL_PADDING = 12;
 Blockly.DropDownDiv.PADDING_Y = 20;
 
 /**
+ * Minimum height, in px, of the scrollable content area when clamped.
+ * @type {number}
+ * @const
+ */
+Blockly.DropDownDiv.MIN_CONTENT_HEIGHT = 72;
+
+/**
  * Length of animations in seconds.
  * @type {number}
  * @const
@@ -268,34 +275,53 @@ Blockly.DropDownDiv.show = function(owner, primaryX, primaryY, secondaryX, secon
  */
 Blockly.DropDownDiv.getPositionMetrics = function(primaryX, primaryY, secondaryX, secondaryY) {
   var div = Blockly.DropDownDiv.DIV_;
+  var content = Blockly.DropDownDiv.content_;
+  // Clear any clamp left by a previous drop-down before measuring.
+  content.style.maxHeight = '';
   var boundPosition = Blockly.DropDownDiv.boundsElement_.getBoundingClientRect();
 
   var boundSize = goog.style.getSize(Blockly.DropDownDiv.boundsElement_);
   var divSize = goog.style.getSize(div);
 
+  // The box is position:fixed, so the window clips it; the bounds element is
+  // sized in vh and may extend past it. Use whichever edge comes first.
+  var viewportHeight = (window.innerHeight ||
+      document.documentElement.clientHeight);
+  var limitTop = Math.max(boundPosition.top, 0);
+  var limitBottom = Math.min(boundPosition.top + boundSize.height,
+      viewportHeight);
+
+  var spaceBelow = limitBottom - (primaryY + Blockly.DropDownDiv.PADDING_Y);
+  var spaceAbove = (secondaryY - Blockly.DropDownDiv.PADDING_Y) - limitTop;
+
   // First decide if we will render at primary or secondary position
   // i.e., above or below
   // renderX, renderY will eventually be the final rendered position of the box.
   var renderX, renderY, renderedSecondary;
-  // Can the div fit inside the bounds if we render below the primary point?
-  if (primaryY + divSize.height > boundPosition.top + boundSize.height) {
-    // We can't fit below in terms of y. Can we fit above?
-    if (secondaryY - divSize.height < boundPosition.top) {
-      // We also can't fit above, so just render below anyway.
-      renderX = primaryX;
-      renderY = primaryY + Blockly.DropDownDiv.PADDING_Y;
-      renderedSecondary = false;
-    } else {
-      // We can fit above, render secondary
-      renderX = secondaryX;
-      renderY = secondaryY - divSize.height - Blockly.DropDownDiv.PADDING_Y;
-      renderedSecondary = true;
-    }
-  } else {
+  if (divSize.height <= spaceBelow) {
     // We can fit below, render primary
+    renderedSecondary = false;
+  } else if (divSize.height <= spaceAbove) {
+    // We can fit above, render secondary
+    renderedSecondary = true;
+  } else {
+    // Fits neither side: use the roomier one and clamp the box to it, so the
+    // content's overflow stays on screen and scrollable.
+    renderedSecondary = spaceAbove > spaceBelow;
+    var available = renderedSecondary ? spaceAbove : spaceBelow;
+    // Box border and padding, which the clamp must leave room for.
+    var chrome = divSize.height - goog.style.getSize(content).height;
+    content.style.maxHeight = Math.max(
+        Blockly.DropDownDiv.MIN_CONTENT_HEIGHT, available - chrome) + 'px';
+    // Re-measure: positioning below must use the clamped height.
+    divSize = goog.style.getSize(div);
+  }
+  if (renderedSecondary) {
+    renderX = secondaryX;
+    renderY = secondaryY - divSize.height - Blockly.DropDownDiv.PADDING_Y;
+  } else {
     renderX = primaryX;
     renderY = primaryY + Blockly.DropDownDiv.PADDING_Y;
-    renderedSecondary = false;
   }
   // First calculate the absolute arrow X
   // This needs to be done before positioning the div, since the arrow
