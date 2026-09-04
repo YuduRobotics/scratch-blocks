@@ -637,6 +637,29 @@ Blockly.Connection.prototype.targetBlock = function() {
  * @protected
  */
 Blockly.Connection.prototype.checkType_ = function(otherConnection) {
+  if (this.sourceBlock_ && otherConnection.sourceBlock_) {
+    var inputConnection = this.type === Blockly.INPUT_VALUE ? this : 
+                          (otherConnection.type === Blockly.INPUT_VALUE ? otherConnection : null);
+    var outputConnection = this.type === Blockly.OUTPUT_VALUE ? this : 
+                           (otherConnection.type === Blockly.OUTPUT_VALUE ? otherConnection : null);
+
+    if (inputConnection && outputConnection) {
+      var inputBlockType = (inputConnection.sourceBlock_.type || '').toLowerCase();
+      var isOledBlock = inputBlockType.indexOf('oled') !== -1;
+      var isOperatorBlock = inputBlockType.indexOf('operator_') !== -1;
+
+      var outputIsBoolean = (outputConnection.check_ && outputConnection.check_.indexOf('Boolean') !== -1) ||
+                            (outputConnection.getOutputShape && outputConnection.getOutputShape() === Blockly.OUTPUT_SHAPE_HEXAGONAL);
+
+      if ((isOledBlock || isOperatorBlock) && outputIsBoolean) {
+        // If the input explicitly requires Boolean, we should allow it (e.g. operator_and, operator_or, operator_not).
+        var inputRequiresBoolean = inputConnection.check_ && inputConnection.check_.indexOf('Boolean') !== -1;
+        if (!inputRequiresBoolean) {
+          return false; // Reject Boolean/Hexagon condition connections for OLED display and non-Boolean Operator blocks
+        }
+      }
+    }
+  }
   if (!this.check_ || !otherConnection.check_) {
     // One or both sides are promiscuous enough that anything will fit.
     return true;
