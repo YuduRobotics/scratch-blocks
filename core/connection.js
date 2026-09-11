@@ -638,9 +638,9 @@ Blockly.Connection.prototype.targetBlock = function() {
  */
 Blockly.Connection.prototype.checkType_ = function(otherConnection) {
   if (this.sourceBlock_ && otherConnection.sourceBlock_) {
-    var inputConnection = this.type === Blockly.INPUT_VALUE ? this : 
+    var inputConnection = this.type === Blockly.INPUT_VALUE ? this :
                           (otherConnection.type === Blockly.INPUT_VALUE ? otherConnection : null);
-    var outputConnection = this.type === Blockly.OUTPUT_VALUE ? this : 
+    var outputConnection = this.type === Blockly.OUTPUT_VALUE ? this :
                            (otherConnection.type === Blockly.OUTPUT_VALUE ? otherConnection : null);
 
     if (inputConnection && outputConnection) {
@@ -648,14 +648,35 @@ Blockly.Connection.prototype.checkType_ = function(otherConnection) {
       var isOledBlock = inputBlockType.indexOf('oled') !== -1;
       var isOperatorBlock = inputBlockType.indexOf('operator_') !== -1;
 
-      var outputIsBoolean = (outputConnection.check_ && outputConnection.check_.indexOf('Boolean') !== -1) ||
-                            (outputConnection.getOutputShape && outputConnection.getOutputShape() === Blockly.OUTPUT_SHAPE_HEXAGONAL);
+      // A block is considered boolean/hexagonal if any of the following is true:
+      //   1. Its output connection check list includes 'Boolean' (set by the VM for
+      //      BlockType.BOOLEAN extension blocks, e.g. AI-1 condition blocks).
+      //   2. Its connection's computed output shape is hexagonal (derived from
+      //      check_ — covers the same case via a different code path).
+      //   3. Its source block's own outputShape_ is hexagonal (covers custom blocks
+      //      that set the shape directly without a typed check, ensuring no
+      //      hexagonal block can slip through even with a null check_).
+      var outputIsBoolean =
+          (outputConnection.check_ &&
+           outputConnection.check_.indexOf('Boolean') !== -1) ||
+          (outputConnection.getOutputShape &&
+           outputConnection.getOutputShape() === Blockly.OUTPUT_SHAPE_HEXAGONAL) ||
+          (outputConnection.sourceBlock_ &&
+           outputConnection.sourceBlock_.getOutputShape &&
+           outputConnection.sourceBlock_.getOutputShape() ===
+               Blockly.OUTPUT_SHAPE_HEXAGONAL);
 
       if ((isOledBlock || isOperatorBlock) && outputIsBoolean) {
-        // If the input explicitly requires Boolean, we should allow it (e.g. operator_and, operator_or, operator_not).
-        var inputRequiresBoolean = inputConnection.check_ && inputConnection.check_.indexOf('Boolean') !== -1;
+        // Allow the connection only when the input slot itself explicitly
+        // requires a Boolean value (e.g. the operands of operator_and /
+        // operator_or / operator_not). In all other cases — plain OLED value
+        // inputs and numeric/string operator inputs — hexagonal condition
+        // blocks must be rejected.
+        var inputRequiresBoolean =
+            inputConnection.check_ &&
+            inputConnection.check_.indexOf('Boolean') !== -1;
         if (!inputRequiresBoolean) {
-          return false; // Reject Boolean/Hexagon condition connections for OLED display and non-Boolean Operator blocks
+          return false;
         }
       }
     }
