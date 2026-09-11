@@ -459,3 +459,172 @@ function test_canConnectWithReason_OledAllowsNumber() {
   assertEquals(Blockly.Connection.CAN_CONNECT,
       oledInput.canConnectWithReason_(numberOutput));
 }
+
+// ─── Bug fix: hexagon blocks blocked from OLED / Operator value slots ───────
+// These tests cover both the typed-Boolean path (check_ = ['Boolean'], used by
+// AI-1 v1 / AI-1 v2 condition blocks) and the shape-only path (outputShape_ =
+// HEXAGONAL with null check_, e.g. raw custom blocks).
+
+/**
+ * Helper: make a source-block stub that reports a specific output shape.
+ * Used to simulate blocks whose shape is set directly (no check_ on the
+ * output connection) — the third detection path in checkType_.
+ */
+function helper_makeHexagonalSourceBlock(sharedWorkspace) {
+  var block = helper_makeSourceBlock(sharedWorkspace);
+  block.getOutputShape = function() { return Blockly.OUTPUT_SHAPE_HEXAGONAL; };
+  return block;
+}
+
+// Bug 1 / Bug 2 — AI-1 v1 & v2 condition blocks (check_=['Boolean'])
+// ─────────────────────────────────────────────────────────────────────
+
+function test_canConnectWithReason_OledRejectsAI1BooleanBlock() {
+  // Simulates dragging an AI-1 condition block (blockType: BOOLEAN →
+  // check_=['Boolean']) into the value slot of an OLED display block.
+  var sharedWorkspace = {};
+  var oledInput = helper_createConnection(0, 0, Blockly.INPUT_VALUE);
+  oledInput.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  // Use a realistic OLED opcode as it appears in Blockly: <extensionId>_<opcode>
+  oledInput.sourceBlock_.type = 'ace_output_oled_sensor';
+
+  var ai1Output = helper_createConnection(0, 0, Blockly.OUTPUT_VALUE);
+  ai1Output.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  ai1Output.setCheck('Boolean'); // set by runtime for BlockType.BOOLEAN
+
+  assertEquals(
+      'AI-1 condition block must be rejected by OLED display input',
+      Blockly.Connection.REASON_CHECKS_FAILED,
+      oledInput.canConnectWithReason_(ai1Output));
+}
+
+function test_canConnectWithReason_OledRejectsAI1v2BooleanBlock() {
+  // Same scenario but with a different extension id (zingTwoPointZero).
+  var sharedWorkspace = {};
+  var oledInput = helper_createConnection(0, 0, Blockly.INPUT_VALUE);
+  oledInput.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  oledInput.sourceBlock_.type = 'zingTwoPointZero_output_oled_line';
+
+  var ai1v2Output = helper_createConnection(0, 0, Blockly.OUTPUT_VALUE);
+  ai1v2Output.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  ai1v2Output.setCheck('Boolean');
+
+  assertEquals(
+      'AI-1 v2 condition block must be rejected by OLED display input',
+      Blockly.Connection.REASON_CHECKS_FAILED,
+      oledInput.canConnectWithReason_(ai1v2Output));
+}
+
+function test_canConnectWithReason_OperatorRejectsAI1BooleanBlock() {
+  // Simulates dragging an AI-1 condition block into a numeric operator slot
+  // (e.g. operator_add, operator_join — slots that do NOT require Boolean).
+  var sharedWorkspace = {};
+  var operatorInput = helper_createConnection(0, 0, Blockly.INPUT_VALUE);
+  operatorInput.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  operatorInput.sourceBlock_.type = 'operator_join';
+
+  var ai1Output = helper_createConnection(0, 0, Blockly.OUTPUT_VALUE);
+  ai1Output.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  ai1Output.setCheck('Boolean');
+
+  assertEquals(
+      'AI-1 condition block must be rejected by non-Boolean operator input',
+      Blockly.Connection.REASON_CHECKS_FAILED,
+      operatorInput.canConnectWithReason_(ai1Output));
+}
+
+// Shape-only path (outputShape_ = HEXAGONAL, check_ is null)
+// ────────────────────────────────────────────────────────────
+
+function test_canConnectWithReason_OledRejectsHexagonalShapeOnlyBlock() {
+  // Block whose output connection has no check_ but whose block-level
+  // outputShape_ is set to HEXAGONAL.  Before the third detection path was
+  // added this would slip through the guard.
+  var sharedWorkspace = {};
+  var oledInput = helper_createConnection(0, 0, Blockly.INPUT_VALUE);
+  oledInput.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  oledInput.sourceBlock_.type = 'hexapodTwoPointZero_output_oled_sensor';
+
+  var hexOutput = helper_createConnection(0, 0, Blockly.OUTPUT_VALUE);
+  // Deliberately leave check_ null (promiscuous output) but give the block
+  // a hexagonal shape, simulating a custom condition block that sets shape
+  // without going through setCheck.
+  hexOutput.sourceBlock_ = helper_makeHexagonalSourceBlock(sharedWorkspace);
+
+  assertEquals(
+      'Hexagonal-shape block (null check_) must be rejected by OLED input',
+      Blockly.Connection.REASON_CHECKS_FAILED,
+      oledInput.canConnectWithReason_(hexOutput));
+}
+
+function test_canConnectWithReason_OperatorRejectsHexagonalShapeOnlyBlock() {
+  var sharedWorkspace = {};
+  var operatorInput = helper_createConnection(0, 0, Blockly.INPUT_VALUE);
+  operatorInput.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  operatorInput.sourceBlock_.type = 'operator_add';
+
+  var hexOutput = helper_createConnection(0, 0, Blockly.OUTPUT_VALUE);
+  hexOutput.sourceBlock_ = helper_makeHexagonalSourceBlock(sharedWorkspace);
+
+  assertEquals(
+      'Hexagonal-shape block (null check_) must be rejected by operator_add input',
+      Blockly.Connection.REASON_CHECKS_FAILED,
+      operatorInput.canConnectWithReason_(hexOutput));
+}
+
+// Regression guards — valid connections must still be accepted
+// ─────────────────────────────────────────────────────────────
+
+function test_canConnectWithReason_OledAcceptsStringReporter() {
+  // A plain string reporter (oval, check_=['String']) must still fit inside
+  // an OLED value slot.
+  var sharedWorkspace = {};
+  var oledInput = helper_createConnection(0, 0, Blockly.INPUT_VALUE);
+  oledInput.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  oledInput.sourceBlock_.type = 'ace_output_oled_sensor';
+
+  var stringOutput = helper_createConnection(0, 0, Blockly.OUTPUT_VALUE);
+  stringOutput.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  stringOutput.setCheck('String');
+
+  assertEquals(
+      'String reporter must be accepted by OLED display input',
+      Blockly.Connection.CAN_CONNECT,
+      oledInput.canConnectWithReason_(stringOutput));
+}
+
+function test_canConnectWithReason_OperatorAcceptsNumberReporter() {
+  // A number reporter must still fit inside an operator_add value slot.
+  var sharedWorkspace = {};
+  var operatorInput = helper_createConnection(0, 0, Blockly.INPUT_VALUE);
+  operatorInput.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  operatorInput.sourceBlock_.type = 'operator_add';
+
+  var numberOutput = helper_createConnection(0, 0, Blockly.OUTPUT_VALUE);
+  numberOutput.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  numberOutput.setCheck('Number');
+
+  assertEquals(
+      'Number reporter must be accepted by operator_add input',
+      Blockly.Connection.CAN_CONNECT,
+      operatorInput.canConnectWithReason_(numberOutput));
+}
+
+function test_canConnectWithReason_OperatorNotAllowsBooleanInput() {
+  // operator_not has a Boolean input slot — a Boolean output must still be
+  // accepted there.
+  var sharedWorkspace = {};
+  var notInput = helper_createConnection(0, 0, Blockly.INPUT_VALUE);
+  notInput.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  notInput.sourceBlock_.type = 'operator_not';
+  notInput.setCheck('Boolean'); // this slot explicitly requires Boolean
+
+  var booleanOutput = helper_createConnection(0, 0, Blockly.OUTPUT_VALUE);
+  booleanOutput.sourceBlock_ = helper_makeSourceBlock(sharedWorkspace);
+  booleanOutput.setCheck('Boolean');
+
+  assertEquals(
+      'Boolean output must be accepted by operator_not Boolean input',
+      Blockly.Connection.CAN_CONNECT,
+      notInput.canConnectWithReason_(booleanOutput));
+}
