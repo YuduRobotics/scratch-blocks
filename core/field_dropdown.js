@@ -368,7 +368,7 @@ Blockly.FieldDropdown.prototype.isOptionListDynamic = function() {
  */
 Blockly.FieldDropdown.prototype.getOptions = function() {
   if (goog.isFunction(this.menuGenerator_)) {
-    return this.menuGenerator_.call(this);
+    return this.menuGenerator_.call(this, this.sourceBlock_);
   }
   return /** @type {!Array.<!Array.<string>>} */ (this.menuGenerator_);
 };
