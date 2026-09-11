@@ -1347,5 +1347,43 @@ Blockly.Css.CONTENT = [
   '.scratchCategoryMenuItem:hover {',
     'color: $colour_toolboxHover !important;',
   '}',
+
+  '.blocklyWheelPicker {',
+    'position: relative;',
+    'width: 64px;',
+    'overflow: hidden;',
+  '}',
+
+  '.blocklyWheelPickerCenterBand {',
+    'position: absolute;',
+    'left: 0;',
+    'right: 0;',
+    'border-top: 1px solid rgba(0, 0, 0, 0.15);',
+    'border-bottom: 1px solid rgba(0, 0, 0, 0.15);',
+    'pointer-events: none;',
+  '}',
+
+  '.blocklyWheelPickerList {',
+    'height: 100%;',
+    'overflow-y: auto;',
+    'scroll-snap-type: y mandatory;',
+    '-webkit-mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent);',
+    'mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent);',
+  '}',
+
+  '.blocklyWheelPickerItem {',
+    'text-align: center;',
+    'scroll-snap-align: center;',
+    'font-family: "Helvetica Neue", Helvetica, sans-serif;',
+    'font-size: 13pt;',
+    'color: rgba(87, 94, 117, 0.5);',
+    'cursor: pointer;',
+    'user-select: none;',
+  '}',
+
+  '.blocklyWheelPickerItemSelected {',
+    'color: $colour_textFieldText;',
+    'font-weight: bold;',
+  '}',
   ''
 ];

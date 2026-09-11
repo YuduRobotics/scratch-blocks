@@ -126,16 +126,39 @@ Blockly.FieldTextInput.prototype.init = function() {
 
   // If not in a shadow block, draw a box.
   if (notInShadow) {
+    var pillRadius = this.size_.height / 2;
     this.box_ = Blockly.utils.createSvgElement('rect',
         {
+          'rx': pillRadius,
+          'ry': pillRadius,
           'x': 0,
           'y': 0,
           'width': this.size_.width,
           'height': this.size_.height,
-          'fill': this.sourceBlock_.getColourTertiary()
+          'fill': Blockly.Colours.textField
         }
     );
     this.fieldGroup_.insertBefore(this.box_, this.textElement_);
+
+    this.textElement_.style.setProperty(
+        'fill', Blockly.Colours.textFieldText, 'important');
+
+    this.render_();
+  }
+};
+
+/**
+ * Updates the width of the field. Fields drawn directly on the block face
+ * (no shadow sub-block, e.g. a locked text field) have no minimum width by
+ * default and shrink down to just the text, so enforce a usable minimum
+ * here, matching the minimum already used for the editing widget.
+ * @override
+ */
+Blockly.FieldTextInput.prototype.updateWidth = function() {
+  Blockly.FieldTextInput.superClass_.updateWidth.call(this);
+  if (this.box_) {
+    this.size_.width = Math.max(
+        this.size_.width, Blockly.BlockSvg.FIELD_WIDTH_MIN_EDIT);
   }
 };
 
@@ -553,6 +576,9 @@ Blockly.FieldTextInput.prototype.resizeEditor_ = function() {
  * @return {Number} Border radius in px.
 */
 Blockly.FieldTextInput.prototype.getBorderRadius = function() {
+  if (!this.sourceBlock_.isShadow()) {
+    return Blockly.BlockSvg.FIELD_HEIGHT_MAX_EDIT / 2;
+  }
   if (this.sourceBlock_.getOutputShape() == Blockly.OUTPUT_SHAPE_ROUND) {
     return Blockly.BlockSvg.NUMBER_FIELD_CORNER_RADIUS;
   }
