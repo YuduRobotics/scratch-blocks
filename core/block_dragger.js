@@ -246,8 +246,6 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
         this.draggedConnectionManager_.wasAndInAndRejected &&
         this.draggedConnectionManager_.wasAndInAndRejected();
     if (rejectedAndInAnd) {
-      // Bounce the block back to where the drag started instead of leaving
-      // it disconnected wherever the invalid drop was attempted.
       newLoc = this.startXY_;
       this.draggingBlock_.translate(newLoc.x, newLoc.y);
       delta = new goog.math.Coordinate(0, 0);
