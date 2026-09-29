@@ -330,11 +330,6 @@ class Gen_compressed(threading.Thread):
       # Drop any falsy members
       dash_args = list(filter(lambda item: item, dash_args))
 
-      # On Windows the compiler is invoked through a .cmd wrapper, which
-      # re-dispatches through cmd.exe and hits its ~8191-char command line
-      # limit long before Python's own limit for large file lists (e.g. the
-      # full core Blockly source). Route the args through a flagfile (one per
-      # line, standard Closure Compiler flag) to sidestep that entirely.
       flagfile_path = os.path.join("build", "compiler_args.txt")
       with open(flagfile_path, "w") as flagfile:
         flagfile.write("\n".join(dash_args))
