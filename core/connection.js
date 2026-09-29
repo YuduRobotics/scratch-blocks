@@ -680,15 +680,8 @@ Blockly.Connection.prototype.checkType_ = function(otherConnection) {
         }
       }
 
-      // An AND block cannot be nested inside another AND block. Reject the
-      // connection outright so the dragged block bounces back instead of
-      // attaching and only failing validation afterward.
       var outputBlockType = (outputConnection.sourceBlock_.type || '').toLowerCase();
       if (inputBlockType === 'operator_and' && outputBlockType === 'operator_and') {
-        // Record that we rejected an AND-inside-AND attempt this close to the
-        // pointer (checkType_ only runs on candidates already inside the drag
-        // snap radius). The drag machinery reads and clears this flag each
-        // move cycle to decide whether to surface an alert on drop.
         Blockly.Connection.lastAndInAndReject_ = true;
         return false;
       }
