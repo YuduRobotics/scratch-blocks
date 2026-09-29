@@ -242,6 +242,14 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
 
   var deleted = this.maybeDeleteBlock_();
   if (!deleted) {
+    var rejectedAndInAnd = !this.draggedConnectionManager_.wouldConnectBlock() &&
+        this.draggedConnectionManager_.wasAndInAndRejected &&
+        this.draggedConnectionManager_.wasAndInAndRejected();
+    if (rejectedAndInAnd) {
+      newLoc = this.startXY_;
+      this.draggingBlock_.translate(newLoc.x, newLoc.y);
+      delta = new goog.math.Coordinate(0, 0);
+    }
     // These are expensive and don't need to be done if we're deleting.
     this.draggingBlock_.moveConnections_(delta.x, delta.y);
     this.draggingBlock_.setDragging(false);
@@ -253,6 +261,9 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
       this.draggingBlock_.render();
     }
     this.draggingBlock_.scheduleSnapAndBump();
+    if (rejectedAndInAnd && typeof document !== 'undefined') {
+      document.dispatchEvent(new CustomEvent('scratchblocks_and_in_and_rejected'));
+    }
   }
   this.workspace_.setResizesEnabled(true);
 

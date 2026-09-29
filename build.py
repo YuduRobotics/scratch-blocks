@@ -327,14 +327,17 @@ class Gen_compressed(threading.Thread):
         if pair[0][2:] not in filter_keys:
           dash_args.extend(pair)
 
-      # Build the final args array by prepending CLOSURE_COMPILER_NPM to
-      # dash_args and dropping any falsy members
-      args = []
-      for group in [[CLOSURE_COMPILER_NPM], dash_args]:
-        args.extend(filter(lambda item: item, group))
+      # Drop any falsy members
+      dash_args = list(filter(lambda item: item, dash_args))
+
+      flagfile_path = os.path.join("build", "compiler_args.txt")
+      with open(flagfile_path, "w") as flagfile:
+        flagfile.write("\n".join(dash_args))
+      args = [CLOSURE_COMPILER_NPM, "--flagfile=" + flagfile_path]
 
       proc = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
       (stdout, stderr) = proc.communicate()
+      os.remove(flagfile_path)
 
       # Build the JSON response.
       filesizes = [os.path.getsize(value) for (arg, value) in params if arg == "js_file"]

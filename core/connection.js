@@ -679,6 +679,12 @@ Blockly.Connection.prototype.checkType_ = function(otherConnection) {
           return false;
         }
       }
+
+      var outputBlockType = (outputConnection.sourceBlock_.type || '').toLowerCase();
+      if (inputBlockType === 'operator_and' && outputBlockType === 'operator_and') {
+        Blockly.Connection.lastAndInAndReject_ = true;
+        return false;
+      }
     }
   }
   if (!this.check_ || !otherConnection.check_) {
