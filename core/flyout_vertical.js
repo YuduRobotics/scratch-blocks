@@ -255,14 +255,14 @@ Blockly.VerticalFlyout.prototype.getMetrics_ = function() {
   // the last category.
   var contentHeight = optionBox.height * this.workspace_.scale;
   this.recordCategoryScrollPositions_();
-  var bottomPadding = this.MARGIN;
+  var bottomPadding = this.MARGIN + 8; // +8 accounts for CSS flyout height offset (margin-top:4px + margin-bottom:4px)
   if (this.categoryScrollPositions.length > 0) {
     var lastLabel = this.categoryScrollPositions[
         this.categoryScrollPositions.length - 1];
     var lastPos = lastLabel.position * this.workspace_.scale;
     var lastCategoryHeight = contentHeight - lastPos;
     if (lastCategoryHeight < viewHeight) {
-      bottomPadding = viewHeight - lastCategoryHeight;
+      bottomPadding = Math.max(this.MARGIN + 8, viewHeight - lastCategoryHeight);
     }
   }
 
