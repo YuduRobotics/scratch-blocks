@@ -41,7 +41,7 @@ goog.require('Blockly.constants');
  * @return {function} An extension function that sets colours based on the given
  *     category.
  */
-Blockly.ScratchBlocks.VerticalExtensions.colourHelper = function(category) {
+Blockly.ScratchBlocks.VerticalExtensions.colourHelper = function (category) {
   var colours = Blockly.Colours[category];
   if (!(colours && colours.primary && colours.secondary && colours.tertiary &&
     colours.quaternary)) {
@@ -52,19 +52,19 @@ Blockly.ScratchBlocks.VerticalExtensions.colourHelper = function(category) {
    * the given category.
    * @this {Blockly.Block}
    */
-  return function() {
+  return function () {
     this.setColourFromRawValues_(colours.primary, colours.secondary,
-        colours.tertiary, colours.quaternary);
+      colours.tertiary, colours.quaternary);
   };
 };
 
 /**
  * Extension to set the colours of a text field, which are all the same.
  */
-Blockly.ScratchBlocks.VerticalExtensions.COLOUR_TEXTFIELD = function() {
+Blockly.ScratchBlocks.VerticalExtensions.COLOUR_TEXTFIELD = function () {
   this.setColourFromRawValues_(Blockly.Colours.textField,
-      Blockly.Colours.textField, Blockly.Colours.textField,
-      Blockly.Colours.textField);
+    Blockly.Colours.textField, Blockly.Colours.textField,
+    Blockly.Colours.textField);
 };
 
 /**
@@ -74,7 +74,7 @@ Blockly.ScratchBlocks.VerticalExtensions.COLOUR_TEXTFIELD = function() {
  * @this {Blockly.Block}
  * @readonly
  */
-Blockly.ScratchBlocks.VerticalExtensions.SHAPE_STATEMENT = function() {
+Blockly.ScratchBlocks.VerticalExtensions.SHAPE_STATEMENT = function () {
   this.setInputsInline(true);
   this.setPreviousStatement(true, null);
   this.setNextStatement(true, null);
@@ -87,7 +87,7 @@ Blockly.ScratchBlocks.VerticalExtensions.SHAPE_STATEMENT = function() {
  * @this {Blockly.Block}
  * @readonly
  */
-Blockly.ScratchBlocks.VerticalExtensions.SHAPE_HAT = function() {
+Blockly.ScratchBlocks.VerticalExtensions.SHAPE_HAT = function () {
   this.setInputsInline(true);
   this.setNextStatement(true, null);
 };
@@ -99,7 +99,7 @@ Blockly.ScratchBlocks.VerticalExtensions.SHAPE_HAT = function() {
  * @this {Blockly.Block}
  * @readonly
  */
-Blockly.ScratchBlocks.VerticalExtensions.SHAPE_END = function() {
+Blockly.ScratchBlocks.VerticalExtensions.SHAPE_END = function () {
   this.setInputsInline(true);
   this.setPreviousStatement(true, null);
 };
@@ -111,7 +111,7 @@ Blockly.ScratchBlocks.VerticalExtensions.SHAPE_END = function() {
  * @this {Blockly.Block}
  * @readonly
  */
-Blockly.ScratchBlocks.VerticalExtensions.OUTPUT_NUMBER = function() {
+Blockly.ScratchBlocks.VerticalExtensions.OUTPUT_NUMBER = function () {
   this.setInputsInline(true);
   this.setOutputShape(Blockly.OUTPUT_SHAPE_ROUND);
   this.setOutput(true, 'Number');
@@ -124,7 +124,7 @@ Blockly.ScratchBlocks.VerticalExtensions.OUTPUT_NUMBER = function() {
  * @this {Blockly.Block}
  * @readonly
  */
-Blockly.ScratchBlocks.VerticalExtensions.OUTPUT_STRING = function() {
+Blockly.ScratchBlocks.VerticalExtensions.OUTPUT_STRING = function () {
   this.setInputsInline(true);
   this.setOutputShape(Blockly.OUTPUT_SHAPE_ROUND);
   this.setOutput(true, 'String');
@@ -137,7 +137,7 @@ Blockly.ScratchBlocks.VerticalExtensions.OUTPUT_STRING = function() {
  * @this {Blockly.Block}
  * @readonly
  */
-Blockly.ScratchBlocks.VerticalExtensions.OUTPUT_BOOLEAN = function() {
+Blockly.ScratchBlocks.VerticalExtensions.OUTPUT_BOOLEAN = function () {
   this.setInputsInline(true);
   this.setOutputShape(Blockly.OUTPUT_SHAPE_HEXAGONAL);
   this.setOutput(true, 'Boolean');
@@ -158,7 +158,7 @@ Blockly.ScratchBlocks.VerticalExtensions.PROCEDURE_DEF_CONTEXTMENU = {
    * @param {!Array.<!Object>} menuOptions List of menu options to edit.
    * @this Blockly.Block
    */
-  customContextMenu: function(menuOptions) {
+  customContextMenu: function (menuOptions) {
     // Add the edit option at the end.
     menuOptions.push(Blockly.Procedures.makeEditOption(this));
 
@@ -174,9 +174,9 @@ Blockly.ScratchBlocks.VerticalExtensions.PROCEDURE_DEF_CONTEXTMENU = {
           return;
         }
         var rootBlock = this;
-        option.callback = function() {
+        option.callback = function () {
           var didDelete = Blockly.Procedures.deleteProcedureDefCallback(
-              procCode, rootBlock);
+            procCode, rootBlock);
           if (!didDelete) {
             alert(Blockly.Msg.PROCEDURE_USED);
           }
@@ -208,59 +208,59 @@ Blockly.ScratchBlocks.VerticalExtensions.PROCEDURE_CALL_CONTEXTMENU = {
    * @param {!Array.<!Object>} menuOptions List of menu options to edit.
    * @this Blockly.Block
    */
-  customContextMenu: function(menuOptions) {
+  customContextMenu: function (menuOptions) {
     menuOptions.push(Blockly.Procedures.makeEditOption(this));
   }
 };
 
 
-Blockly.ScratchBlocks.VerticalExtensions.SCRATCH_EXTENSION = function() {
+Blockly.ScratchBlocks.VerticalExtensions.SCRATCH_EXTENSION = function () {
   this.isScratchExtension = true;
 };
 /**
  * Register all extensions for scratch-blocks.
  * @package
  */
-Blockly.ScratchBlocks.VerticalExtensions.registerAll = function() {
+Blockly.ScratchBlocks.VerticalExtensions.registerAll = function () {
   var categoryNames =
-      ['control', 'data', 'data_lists', 'sounds', 'motion', 'looks', 'event',
-        'sensing', 'pen', 'operators', 'more'];
+    ['control', 'data', 'data_lists', 'sounds', 'motion', 'looks', 'event',
+      'sensing', 'pen', 'operators', 'more'];
   // Register functions for all category colours.
   for (var i = 0; i < categoryNames.length; i++) {
     var name = categoryNames[i];
     Blockly.Extensions.register('colours_' + name,
-        Blockly.ScratchBlocks.VerticalExtensions.colourHelper(name));
+      Blockly.ScratchBlocks.VerticalExtensions.colourHelper(name));
   }
 
   // Text fields transcend categories.
   Blockly.Extensions.register('colours_textfield',
-      Blockly.ScratchBlocks.VerticalExtensions.COLOUR_TEXTFIELD);
+    Blockly.ScratchBlocks.VerticalExtensions.COLOUR_TEXTFIELD);
 
   // Register extensions for common block shapes.
   Blockly.Extensions.register('shape_statement',
-      Blockly.ScratchBlocks.VerticalExtensions.SHAPE_STATEMENT);
+    Blockly.ScratchBlocks.VerticalExtensions.SHAPE_STATEMENT);
   Blockly.Extensions.register('shape_hat',
-      Blockly.ScratchBlocks.VerticalExtensions.SHAPE_HAT);
+    Blockly.ScratchBlocks.VerticalExtensions.SHAPE_HAT);
   Blockly.Extensions.register('shape_end',
-      Blockly.ScratchBlocks.VerticalExtensions.SHAPE_END);
+    Blockly.ScratchBlocks.VerticalExtensions.SHAPE_END);
 
   // Output shapes and types are related.
   Blockly.Extensions.register('output_number',
-      Blockly.ScratchBlocks.VerticalExtensions.OUTPUT_NUMBER);
+    Blockly.ScratchBlocks.VerticalExtensions.OUTPUT_NUMBER);
   Blockly.Extensions.register('output_string',
-      Blockly.ScratchBlocks.VerticalExtensions.OUTPUT_STRING);
+    Blockly.ScratchBlocks.VerticalExtensions.OUTPUT_STRING);
   Blockly.Extensions.register('output_boolean',
-      Blockly.ScratchBlocks.VerticalExtensions.OUTPUT_BOOLEAN);
+    Blockly.ScratchBlocks.VerticalExtensions.OUTPUT_BOOLEAN);
 
   // Custom procedures have interesting context menus.
   Blockly.Extensions.registerMixin('procedure_def_contextmenu',
-      Blockly.ScratchBlocks.VerticalExtensions.PROCEDURE_DEF_CONTEXTMENU);
+    Blockly.ScratchBlocks.VerticalExtensions.PROCEDURE_DEF_CONTEXTMENU);
   Blockly.Extensions.registerMixin('procedure_call_contextmenu',
-      Blockly.ScratchBlocks.VerticalExtensions.PROCEDURE_CALL_CONTEXTMENU);
+    Blockly.ScratchBlocks.VerticalExtensions.PROCEDURE_CALL_CONTEXTMENU);
 
   // Extension blocks have slightly different block rendering.
   Blockly.Extensions.register('scratch_extension',
-      Blockly.ScratchBlocks.VerticalExtensions.SCRATCH_EXTENSION);
+    Blockly.ScratchBlocks.VerticalExtensions.SCRATCH_EXTENSION);
 };
 
 Blockly.ScratchBlocks.VerticalExtensions.registerAll();
