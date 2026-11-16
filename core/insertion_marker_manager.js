@@ -147,6 +147,14 @@ Blockly.InsertionMarkerManager = function(block) {
    * @private
    */
   this.availableConnections_ = this.initAvailableConnections_();
+
+  /**
+   * Whether the most recent update() call found the drag rejected because it
+   * would have nested an AND block inside another AND block.
+   * @type {boolean}
+   * @private
+   */
+  this.andInAndRejected_ = false;
 };
 
 /**
@@ -234,7 +242,14 @@ Blockly.InsertionMarkerManager.prototype.applyConnections = function() {
  * @package
  */
 Blockly.InsertionMarkerManager.prototype.update = function(dxy, deleteArea) {
+  Blockly.Connection.lastAndInAndReject_ = false;
   var candidate = this.getCandidate_(dxy);
+
+  // A rejected AND-inside-AND attempt only counts as a "near miss" worth
+  // surfacing to the user if nothing else nearby ended up as a valid
+  // connection; otherwise the drag is just passing over the AND block on its
+  // way to a legitimate connection point.
+  this.andInAndRejected_ = !candidate.closest && Blockly.Connection.lastAndInAndReject_;
 
   this.wouldDeleteBlock_ = this.shouldDelete_(candidate, deleteArea);
   var shouldUpdate = this.wouldDeleteBlock_ ||
@@ -247,6 +262,17 @@ Blockly.InsertionMarkerManager.prototype.update = function(dxy, deleteArea) {
     this.maybeShowPreview_(candidate);
     Blockly.Events.enable();
   }
+};
+
+/**
+ * Whether the most recent update() found the dragged block hovering close
+ * enough to another AND block's operand to have been rejected specifically
+ * because AND blocks cannot nest inside each other.
+ * @return {boolean} True if that was the case.
+ * @package
+ */
+Blockly.InsertionMarkerManager.prototype.wasAndInAndRejected = function() {
+  return !!this.andInAndRejected_;
 };
 
 /**** Begin initialization functions ****/
