@@ -70,7 +70,36 @@ goog.inherits(Blockly.FieldDropdown, Blockly.Field);
  * @nocollapse
  */
 Blockly.FieldDropdown.fromJson = function(element) {
-  return new Blockly.FieldDropdown(element['options']);
+  var field = new Blockly.FieldDropdown(element['options']);
+  field.optionsBy_ = element['optionsBy'] || null;
+  return field;
+};
+
+Blockly.FieldDropdown.prototype.getDependencyValue_ = function() {
+  var by = this.optionsBy_;
+  if (!by || !this.sourceBlock_) {
+    return null;
+  }
+  var value = this.sourceBlock_.getFieldValue(by['field']);
+  return value === undefined ? null : value;
+};
+
+Blockly.FieldDropdown.prototype.refreshDependent_ = function() {
+  var options = this.getOptions();
+  for (var i = 0; i < options.length; i++) {
+    if (options[i][1] == this.value_) {
+      var content = options[i][0];
+      if (typeof content == 'object') {
+        this.imageJson_ = content;
+        this.text_ = content.alt;
+      } else {
+        this.imageJson_ = null;
+        this.text_ = content;
+      }
+      this.forceRerender();
+      return;
+    }
+  }
 };
 
 /**
@@ -156,6 +185,21 @@ Blockly.FieldDropdown.prototype.init = function() {
   var text = this.text_;
   this.text_ = null;
   this.setText(text);
+
+  if (this.optionsBy_) {
+    var self = this;
+    var block = this.sourceBlock_;
+    this.dependencyListener_ = function(e) {
+      var mine = e.blockId == block.id;
+      var sibling = mine && e.type == Blockly.Events.BLOCK_CHANGE &&
+          e.element == 'field' && e.name == self.optionsBy_['field'];
+      var placed = mine && e.type == Blockly.Events.BLOCK_CREATE;
+      if (sibling || placed) {
+        self.refreshDependent_();
+      }
+    };
+    block.workspace.addChangeListener(this.dependencyListener_);
+  }
 };
 
 /**
@@ -367,6 +411,13 @@ Blockly.FieldDropdown.prototype.isOptionListDynamic = function() {
  *     (human-readable text or image, language-neutral name).
  */
 Blockly.FieldDropdown.prototype.getOptions = function() {
+  if (this.optionsBy_) {
+    var key = this.getDependencyValue_();
+    var byValue = this.optionsBy_['options'];
+    if (key !== null && byValue[key]) {
+      return byValue[key];
+    }
+  }
   if (goog.isFunction(this.menuGenerator_)) {
     return this.menuGenerator_.call(this, this.sourceBlock_);
   }
@@ -476,6 +527,10 @@ Blockly.FieldDropdown.prototype.positionArrow = function(x) {
  */
 Blockly.FieldDropdown.prototype.dispose = function() {
   this.selectedItem = null;
+  if (this.dependencyListener_ && this.sourceBlock_) {
+    this.sourceBlock_.workspace.removeChangeListener(this.dependencyListener_);
+    this.dependencyListener_ = null;
+  }
   Blockly.WidgetDiv.hideIfOwner(this);
   Blockly.FieldDropdown.superClass_.dispose.call(this);
 };
