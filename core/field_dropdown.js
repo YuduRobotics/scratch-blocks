@@ -71,17 +71,10 @@ goog.inherits(Blockly.FieldDropdown, Blockly.Field);
  */
 Blockly.FieldDropdown.fromJson = function(element) {
   var field = new Blockly.FieldDropdown(element['options']);
-  // Options that depend on a sibling dropdown of the parent block:
-  // {field, options: {<sibling field value>: [[content, value], ...]}}.
   field.optionsBy_ = element['optionsBy'] || null;
   return field;
 };
 
-/**
- * Value of the sibling field (same block) this field's options depend on, or null.
- * @return {?string}
- * @private
- */
 Blockly.FieldDropdown.prototype.getDependencyValue_ = function() {
   var by = this.optionsBy_;
   if (!by || !this.sourceBlock_) {
@@ -91,10 +84,6 @@ Blockly.FieldDropdown.prototype.getDependencyValue_ = function() {
   return value === undefined ? null : value;
 };
 
-/**
- * Re-read the picture/text of the current value after the sibling changed.
- * @private
- */
 Blockly.FieldDropdown.prototype.refreshDependent_ = function() {
   var options = this.getOptions();
   for (var i = 0; i < options.length; i++) {
